@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    image: traefik:1.6.2-alpine # The official Traefik docker image
+    command: --api --docker # Enables the web UI and tells Træfik to listen to docker
+    ports:
+      - "80:80"     # The HTTP port
+      - "8080:8080" # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+      - ./docker/traefik/traefik.toml:/traefik.toml
+  whoami:
+    image: emilevauge/whoami # A container that exposes an API to show its IP address
+    labels:
+      - "traefik.frontend.rule=Host:whoami.docker.localhost"
+  ze:
+    build: .
+    labels:
+      - "traefik.frontend.rule=Host:ze.docker.localhost"

@@ -1,0 +1,52 @@
+logLevel = "INFO"
+
+# Ping definition
+[ping]
+  # Name of the related entry point
+  #
+  # Optional
+  # Default: "traefik"
+  #
+  entryPoint = "traefik"
+
+[traefikLog]
+  filePath = "/opt/traefik.log"
+  format   = "json"
+
+[accessLog]
+  filePath = "/opt/access.log"
+  format = "json"
+
+  [accessLog.filters]
+    statusCodes = ["200", "300-302"]
+    retryAttempts = true
+
+  [accessLog.fields]
+    defaultMode = "keep"
+    [accessLog.fields.names]
+      "ClientUsername" = "drop"
+
+    [accessLog.fields.headers]
+      defaultMode = "keep"
+      [accessLog.fields.headers.names]
+        "User-Agent" = "redact"
+        "Authorization" = "drop"
+        "Content-Type" = "keep"
+
+[frontends]
+  [frontends.frontend1]
+  passHostHeader = true
+  entrypoints = ["http"]
+  backend = "backend1"
+      [frontends.frontend1.routes.test_1]
+      rule = "Path:ze.docker.localhost"
+  [frontends.frontend1.ratelimit]
+  extractorfunc = "client.ip"
+      [frontends.frontend1.ratelimit.rateset.rateset1]
+      period = "10s"
+      average = 100
+      burst = 200
+      [frontends.frontend1.ratelimit.rateset.rateset2]
+      period = "3s"
+      average = 5
+      burst = 10
